@@ -5,10 +5,12 @@
  *
  */
 
-var patient = function(){
+var patient = function(options){
 
-	var mongoose = require('mongoose');
+	//var mongoose = require('mongoose');
+	var mongoose = options._mongoose;
 	var Schema = mongoose.Schema;
+	var modelName = 'Patient';
 
 	var patientSchema = new Schema({
 		name : { type : String, index : { unique : true, required : true } },
@@ -22,9 +24,20 @@ var patient = function(){
 		experiments : [{ type : Schema.ObjectId, ref : 'Experiment' }]
 	});
 
-	var createPatientWithNameAndAge = function(name, age){
-		
+	
+
+	var create = function(name, age){
+				
 	};
+
+	var findAll = function() {
+		return this.model(modelName).find({});
+	};
+
+
+
+	patientSchema.methods.create = create;
+	patientSchema.methods.findAll = findAll;
 
 	var _model = mongoose.model('Patient', patientSchema, 'patients');
 	return {
