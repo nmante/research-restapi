@@ -16,10 +16,13 @@ var studies = function(){
 
 	var _model = mongoose.model('Study', studySchema, 'studies');
 
+	return _model;
+	/*
 	return {
 		model : _model,
 		schema : studySchema
 	};
+	*/
 
 }();
 

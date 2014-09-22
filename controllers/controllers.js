@@ -1,4 +1,4 @@
-var Controllers = function (options, controllersPath, models, views) {
+var Controllers = function (options, controllersPath, models) {
 	
 	// Use to find the names of the files in the controller directory
 	var grabber = options._utils.grabber;
@@ -32,9 +32,11 @@ var Controllers = function (options, controllersPath, models, views) {
 		if ( f !== 'controllers') {
 			var controllerName = require('./' + f);
 			ctrls[f] = controllerName(options._app, 
-					options._config, options._utils);
+					options._config, options._utils, models[f]);
 		}
 	}	
+
+	//ctrls['index'] = require('./index.js')(options, models);
 	
 	// Return the controller object so that other modules can use it
 	// The structure is like so

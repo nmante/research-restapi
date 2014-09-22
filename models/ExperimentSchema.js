@@ -36,11 +36,14 @@ var Experiments = function(){
 	});
 
 	var _model = mongoose.model('Experiment', experimentSchema, 'experiments');
+	return _model;
 
+	/*
 	return {
 		schema : experimentSchema,
 		model : _model
 	};
+	*/
 
 }();
 

@@ -22,7 +22,7 @@ var Models = function(options){
 		patients : _PatientModel
 	};
 
-}();
+};
 
 
 module.exports = Models;

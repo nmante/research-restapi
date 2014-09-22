@@ -40,8 +40,12 @@ var options = {
 	_utils : utils,
 	_mongoose : mongoose	
 };
+
+var models = require('./models/models.js')(options);
 var controllersPath = './controllers';
-var controllers = require('./controllers/controllers')(options, controllersPath);
+var controllers = require('./controllers/controllers')(options, controllersPath, models);
+//console.log(controllers);
+var patient = require('./controllers/patients.js')(app, config, utils, models.patients);
 
 //var db = mongoose(
 /* Configuration */
@@ -63,19 +67,22 @@ app.use(function(req, res, next) {
 });
 
 
-app.locals.baseApiUrl = base = 'api/v1';
-
+app.locals.baseApiUrl = base = '/api/v1';
 // Tell Node+Express to use the modules for the routes
-for (var i = controllers.length - 1; i >= 0; i--) {
+/*for (var i in controllers) {//.length - 1; i >= 0; i--) {
 	// Format of each element is a filename 'controllerName.js'
 	// We only want the 'controllerName' part
 	var filename = controllers[i];	
 
 	// If it's index.js, thats our default route. Should be an empty string
 	var controllerName = filename == 'index' ? '' : filename;
-	
+	console.log(base + '/' + controllerName + ' ' + controllers[controllerName]);
 	app.use(base + '/' + controllerName, controllers[controllerName]); 
-}
+}*/
+app.get('/', function(req, res) {
+	res.send('Hello world');
+});
+app.use(base + '/patient' , patient); 
 
 /* Error Handling */
 
