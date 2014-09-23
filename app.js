@@ -45,14 +45,10 @@ var options = {
 var models = require('./models/models.js')(options);
 var controllersPath = './controllers';
 var controllers = require('./controllers/controllers')(options, controllersPath, models);
-//console.log(controllers);
-//console.log(models.patients);
-var patient = require('./controllers/patients.js')(app, config, utils, models.patients);
-//console.log('patient');
-//console.log(patient);
-//var db = mongoose(
-/* Configuration */
+//var patient = require('./controllers/patients.js')(app, config, utils, models.patients);
 
+
+/* Configuration */
 // Use the 'bodyParser' to make parsing of the 'res' (response) body easy
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
@@ -72,20 +68,23 @@ app.use(function(req, res, next) {
 
 app.locals.baseApiUrl = base = '/api/v1';
 // Tell Node+Express to use the modules for the routes
-/*for (var i in controllers) {//.length - 1; i >= 0; i--) {
+console.log('controllers');
+console.log(controllers);
+for (var url_key in controllers) {//.length - 1; i >= 0; i--) {
 	// Format of each element is a filename 'controllerName.js'
 	// We only want the 'controllerName' part
-	var filename = controllers[i];	
+	var router  = controllers[url_key];	
+	console.log('router object');
+	console.log(router);
 
 	// If it's index.js, thats our default route. Should be an empty string
-	var controllerName = filename == 'index' ? '' : filename;
-	console.log(base + '/' + controllerName + ' ' + controllers[controllerName]);
-	app.use(base + '/' + controllerName, controllers[controllerName]); 
-}*/
-app.get('/', function(req, res) {
-	res.send('Hello world');
-});
-app.use(base + '/patients' , patient); 
+	var url = url_key == 'index' ? '' : url_key;
+	console.log('url');
+	console.log(url);	
+	app.use(base + '/' + url, router); 
+}
+
+
 
 var rt = express.Router();
 //console.log('rt');

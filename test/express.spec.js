@@ -35,6 +35,7 @@ var should = require('should');
 var models = require('./../models/models.js')();
 
 // Connect to our db so we can create and destroy objects at will
+// TODO make sure this only tries to connect once!!!!
 var db = mongoose.connect('mongodb://localhost:27017/research_test');
 
 describe('Express REST Api server.', function(){
