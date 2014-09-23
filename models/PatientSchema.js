@@ -12,7 +12,7 @@ var patient = function(options){
 	var Schema = mongoose.Schema;
 	var modelName = 'Patient';
 
-	var patientSchema = new Schema({
+	var schemaObject = {
 		name : { type : String, index : { unique : true, required : true } },
 		age : Number,
 		impairment : {
@@ -22,22 +22,35 @@ var patient = function(options){
 		modified : { type : Date, default : Date.now },
 		studies : [{ type : Schema.ObjectId, ref : 'Study' }],
 		experiments : [{ type : Schema.ObjectId, ref : 'Experiment' }]
-	});
+	};
+
+	var patientSchema = new Schema(schemaObject);
 
 	var create = function(name, age){
 
 	};
 
-	var findAll = function() {
-		return this.model(modelName).find({});
+	patientSchema.methods.create = create;
+
+	patientSchema.statics.findAll = function(cb) {
+		return this.find({}, cb);
 		
 	};
 
-	patientSchema.methods.create = create;
-	patientSchema.methods.findAll = findAll;
+	var _model;
 
-	
-	var _model = mongoose.model('Patient', patientSchema, 'patients');
+	try {
+		if (mongoose.model(modelName)){
+			_model = mongoose.model(modelName);
+		}	
+	} catch(err) {
+		if (err.name === 'MissingSchemaError') {
+			//var schema = new Schema(schemaObject);
+			_model = mongoose.model(modelName, patientSchema, 'patients');
+		}
+
+	}
+	//var _model = mongoose.model('Patient', patientSchema, 'patients');
 
 	
 

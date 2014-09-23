@@ -12,7 +12,6 @@ module.exports = function patientRouter (_app, _config, _utils, _model) {
 	
 	var model = _model;
 
-
 	// Figure out way to use mongoose model
 
 	var createPatient = function (req, res) {
@@ -28,8 +27,13 @@ module.exports = function patientRouter (_app, _config, _utils, _model) {
 		res.set({
 			'Content-Type' : 'application/json'
 		});
-		var patients = _model.methods.findAll();
-		res.status(200).send(patients);
+		//var patients = 
+		model.findAll(function (err, patients) {
+			console.log('Patients in controller');
+			console.log(patients);
+			res.status(200).send(patients);
+
+		});
 	};
 
 	var updatePatient = function (req, res) {
@@ -39,7 +43,6 @@ module.exports = function patientRouter (_app, _config, _utils, _model) {
 	var deletePatient = function (req, res) {
 
 	};
-	console.log(getPatients);
 
 	// Create a patient
 	router.post('/', createPatient);

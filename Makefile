@@ -1,12 +1,12 @@
 REPORTER = dot
 
 test:
-	@NODE_ENV=test ./node_modules/.bin/mocha \
+	@NODE_ENV=development ./node_modules/.bin/mocha \
 		--reporter $(REPORTER) 
 
 
 test-w:
-	@NODE_ENV=test ./node_modules/.bin/mocha \
+	@NODE_ENV=development ./node_modules/.bin/mocha \
 	       --reporter $(REPORTER) \
 	       --growl \
 	       --watch

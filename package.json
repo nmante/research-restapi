@@ -5,7 +5,7 @@
   "description": "Node.js backend code for Nii Mante Research data",
   "scripts": {
     "test": "make test",
-    "start": "node ./bin/www"
+    "start": "NODE_ENV=development node app.js"
   },
   "dependencies": {
     "body-parser": "1.6.5",

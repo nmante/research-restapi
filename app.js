@@ -8,8 +8,6 @@
 
 /* Includes */
 
-// Configuration file with app keys and database info 
-var config = require('./config/config.json');
 
 // Include the Express modules
 // These will allow us to work with HTTP methods (GET, POST, etc.)
@@ -24,13 +22,16 @@ var mongoose = require('mongoose');
 // Create the express module
 var app = express();
 
+// Configuration file with app keys and database info 
+var config = require('./config/config.json')[app.get('env')];
+
 // Personal Utilities
 var utils = require('./lib/middleware/utils');
 
 // Personal Error Handling Modules
 var errorHandling = require('./lib/middleware/errorHandling.js')
 
-mongoose.connect(config.database.dev);
+mongoose.connect(config.database);
 
 // Include our own custom javascript modules for Routing
 // The modules encapsulate http method behavior for each route
@@ -45,8 +46,10 @@ var models = require('./models/models.js')(options);
 var controllersPath = './controllers';
 var controllers = require('./controllers/controllers')(options, controllersPath, models);
 //console.log(controllers);
+//console.log(models.patients);
 var patient = require('./controllers/patients.js')(app, config, utils, models.patients);
-
+//console.log('patient');
+//console.log(patient);
 //var db = mongoose(
 /* Configuration */
 
@@ -82,8 +85,16 @@ app.locals.baseApiUrl = base = '/api/v1';
 app.get('/', function(req, res) {
 	res.send('Hello world');
 });
-app.use(base + '/patient' , patient); 
+app.use(base + '/patients' , patient); 
 
+var rt = express.Router();
+//console.log('rt');
+//console.log(rt);
+rt.get('/dummy', function(req, res) {
+	res.send('welcome to the dummy');
+});
+
+app.use('/rando', rt);
 /* Error Handling */
 
 // Return errors to the client via 404 and/or error pages
@@ -95,4 +106,14 @@ app.use(errorHandling.errorLogger);
 // Handle the errors on the server side
 app.use(errorHandling.errorHandler);
 
-module.exports = app;
+var debug = require('debug')('nii-research-backend');
+
+app.set('port', process.env.PORT || 3000);
+//var server = 
+app.listen(app.get('port'));
+/*app.listen(app.get('port'), function() {
+  debug('Express server listening on port ' + app.port);
+});
+*/
+
+//module.exports = app;

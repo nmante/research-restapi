@@ -35,11 +35,12 @@ var should = require('should');
 var models = require('./../models/models.js')();
 
 // Connect to our db so we can create and destroy objects at will
-var db = mongoose.createConnection('mongodb://localhost:27017/research_test');
+var db = mongoose.connect('mongodb://localhost:27017/research_test');
 
 describe('Express REST Api server.', function(){
-	//var url = 'http://localhost:3000/';
-	var url = '';
+	//this.timeout(0);
+	var url = 'http://localhost:3000/';
+	//var url = '';
 
 	// Patient test functions
 	describe('Patient tests', function(){
@@ -47,19 +48,18 @@ describe('Express REST Api server.', function(){
 		var cPatient = null;
 		var Patient = models.patients;
 		cPatient = new Patient();
-		beforeEach(function(){
-		//beforeEach(function(done){	
+		//beforeEach(function(){
+		beforeEach(function(done){	
 			// Add some test objects to our DB 
 			// in this module
 			cPatient.name = 'EB';
 			cPatient.age = 74;
-			console.log(cPatient);
 			cPatient.save(function (err) {
-				console.log('Saving patient :' + cPatient);
 				if (err) {
-					console.log('Error saving patient');
+					//console.log('Error saving patient');
+					done();
 				} 
-				//done();
+				done();
 			});
 
 			
@@ -80,14 +80,16 @@ describe('Express REST Api server.', function(){
 */
 		it('finds (GET) all of the patients at the api/v1/patients route',function(done) {
 			superagent
-				.get('/api/v1/patients')
+				.get(url + 'api/v1/patients')
 				.end(function(err, res) {
 					expect(err).to.eql(null);
 					expect(res.body.length).to.be.above(0);
 					expect(res.body.map(function (item){
 						return item.name;
 					})).to.contain(cPatient.name);
+					done();
 				});
+			
 		});
 
 		afterEach(function(done){
