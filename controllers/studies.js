@@ -5,7 +5,8 @@
  *
  */
 
-module.exports = function studyRouter (_app, _config, _utils, _model) {
+//module.exports = function studyRouter (_app, _config, _utils, _model) {
+module.exports = function patientRouter (options, _model) {
 
 	var express = require('express');
 	var router = express.Router();
@@ -22,4 +23,4 @@ module.exports = function studyRouter (_app, _config, _utils, _model) {
 
 	return router;
 
-}
+};

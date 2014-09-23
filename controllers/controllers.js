@@ -31,8 +31,7 @@ var Controllers = function (options, controllersPath, models) {
 		//if (isInArray(f, routeNames) ) {
 		if ( f !== 'controllers') {
 			var controllerName = require('./' + f);
-			ctrls[f] = controllerName(options._app, 
-					options._config, options._utils, models[f]);
+			ctrls[f] = controllerName(options, models[f]);
 		}
 	}	
 

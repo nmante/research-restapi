@@ -66,5 +66,6 @@ var Experiments = function(options){
 	*/
 
 }();
+//};
 
 module.exports = Experiments;

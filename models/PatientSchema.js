@@ -8,6 +8,9 @@
 var patient = function(options){
 
 	var mongoose = require('mongoose');
+
+	//console.log(options._config.database);
+	//console.log(options._config.database);
 	//var mongoose = options._mongoose;
 	var Schema = mongoose.Schema;
 	var modelName = 'Patient';
@@ -31,6 +34,10 @@ var patient = function(options){
 	};
 
 	patientSchema.methods.create = create;
+
+	patientSchema.statics.findByName = function (name, cb) {
+		this.find({name : new RegExp(name, 'i') }, cb);
+	};
 
 	patientSchema.statics.findAll = function(cb) {
 		return this.find({}, cb);
@@ -65,7 +72,7 @@ var patient = function(options){
 	};
 	*/
 
-
 }();
+//};
 
 module.exports = patient;

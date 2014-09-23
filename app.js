@@ -31,7 +31,10 @@ var utils = require('./lib/middleware/utils');
 // Personal Error Handling Modules
 var errorHandling = require('./lib/middleware/errorHandling.js')
 
+console.log(config);
 mongoose.connect(config.database);
+console.log('mongoose');
+console.log(mongoose);
 
 // Include our own custom javascript modules for Routing
 // The modules encapsulate http method behavior for each route
@@ -68,8 +71,6 @@ app.use(function(req, res, next) {
 
 app.locals.baseApiUrl = base = '/api/v1';
 // Tell Node+Express to use the modules for the routes
-console.log('controllers');
-console.log(controllers);
 for (var url_key in controllers) {//.length - 1; i >= 0; i--) {
 	// Format of each element is a filename 'controllerName.js'
 	// We only want the 'controllerName' part
@@ -84,16 +85,6 @@ for (var url_key in controllers) {//.length - 1; i >= 0; i--) {
 	app.use(base + '/' + url, router); 
 }
 
-
-
-var rt = express.Router();
-//console.log('rt');
-//console.log(rt);
-rt.get('/dummy', function(req, res) {
-	res.send('welcome to the dummy');
-});
-
-app.use('/rando', rt);
 /* Error Handling */
 
 // Return errors to the client via 404 and/or error pages

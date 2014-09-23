@@ -44,6 +44,7 @@ var studies = function(options){
 	*/
 
 }();
+//};
 
 
 module.exports = studies;

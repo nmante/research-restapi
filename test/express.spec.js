@@ -79,10 +79,30 @@ describe('Express REST Api server.', function(){
 				});
 		});
 */
+		it('finds (GET) a patient with a specific name at the api/v1/patients/:name route',
+		function(done) {
+			superagent.get(url + 'api/v1/patients/EB')
+				.end(function(err, res) {
+					
+					expect(err).to.eql(null);
+					expect(res.body.length).to.eql(1);
+					expect(res.body.map(function (item) {
+						return item.name;
+					})).to.contain(cPatient.name);
+					done();
+				});
+		});
+
+
+
 		it('finds (GET) all of the patients at the api/v1/patients route',function(done) {
 			superagent
 				.get(url + 'api/v1/patients')
 				.end(function(err, res) {
+					/*if (err) {
+						console.log(err);
+						done();
+					}*/
 					expect(err).to.eql(null);
 					expect(res.body.length).to.be.above(0);
 					expect(res.body.map(function (item){
