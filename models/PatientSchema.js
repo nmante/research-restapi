@@ -27,20 +27,37 @@ var patient = function(options){
 
 	var patientSchema = new Schema(schemaObject);
 
-	patientSchema.methods.create = function (name, age, callback) {
-		
+	patientSchema.statics.createPatient = function (patientDoc, callback) {
+		this.create(patientDoc, callback);
 	};
 
-	patientSchema.statics.findByName = function (name, callback) {
-		this.find({name : new RegExp(name, 'i') }, callback);
+	/* Search the patient collections by name */
+	patientSchema.statics.findPatientByName = function (_name, callback) {
+		this.find({ name : new RegExp(_name, 'i') }, callback);
 	};
 
-	patientSchema.statics.findAll = function(callback) {
+	// Grab all of the patients in the database
+	patientSchema.statics.findAllPatients = function(callback) {
 		this.find({}, callback);
 	};
 
-	var _model;
+	patientSchema.statics.removePatientByName = function(_name, callback){
+		this.remove({ name : _name }, callback); 
 
+	};
+
+	patientSchema.statics.removePatientById = function(id, callback) {
+		this.remove({ _id : id }, callback);
+	};
+
+	/*
+	 * Check to see if our model has been created already
+	 *
+	 * If it has, then we'll just return it
+	 * If it hasn't, then we'll create the model based on our schema above 
+	 */
+
+	var _model;
 	try {
 		if (mongoose.model(modelName)){
 			_model = mongoose.model(modelName);
@@ -54,14 +71,7 @@ var patient = function(options){
 	}
 
 	return _model;	
-	/*
-	return {
-		model : _model,
-		schema : patientSchema
-
-	};
-	*/
-
+	
 }();
 
 module.exports = patient;

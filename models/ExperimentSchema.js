@@ -39,6 +39,13 @@ var Experiments = function(options){
 		return this.find({}, cb);
 	};
 
+
+	/*
+	 * Check to see if our model has been created already
+	 * If it has, then we'll just return it
+	 * If it hasn't, then we'll create the model based on our schema above 
+	 */ 
+
 	var _model; 
 
 	try {
@@ -58,14 +65,6 @@ var Experiments = function(options){
 
 	return _model;
 
-	/*
-	return {
-		schema : experimentSchema,
-		model : _model
-	};
-	*/
-
 }();
-//};
 
 module.exports = Experiments;
