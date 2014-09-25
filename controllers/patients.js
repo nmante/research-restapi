@@ -15,36 +15,60 @@ module.exports = function patientRouter (options, _model) {
 
 	// Figure out way to use mongoose model
 
-	var createPatient = function (req, res) {
-
+	var createPatient = function (req, res, next) {
+		var _name = req.name
 	};
 
-	var getPatient = function (req, res) {
-		var _name = req.param.name;
-		console.log('Patient Name');
+	var getPatientByName = function (req, res, next) {
+		var _name = req.params.name;
+		console.log('Name');
 		console.log(_name);
-		model.findByName (_name, function (err, patient) {
-		       res.status(200).send(patient);
+		model.find({ name : _name}, function (err, patient) {
+			if (err) {
+				next(err);
+			}
+			else if (!patient) {
+				return next(new Error('Error finding patient.'));
+			}
+
+			res.set({ 'Content-Type' : 'application/json' });
+			res.status(200).send(patient);
+			/*
+			req.patient = patient;
+			next();
+			*/
 		});
-		/*
-		model.find({ name : _name }, function (err, patient) {
-		       res.status(200).send(patient);
-		});
-		*/
 
 	};
 
-	var getPatients = function (req, res) {
+	var getPatientById = function (req, res, next) {
+		var id = req.params.id;
+		model.find({ _id : id }, function (err, patient) {
+			if (err) {
+				next(err);
+			}
+			else if (!patient) {
+				//res.status(404).send(;	
+			}
+			
+			res.set( { 'Content-Type' : 'application/json' });
+			res.status(200).send(patient);
+		});
+	}
+
+	var getPatients = function (req, res, next) {
 		// Set the response headers
 		res.set({
 			'Content-Type' : 'application/json'
 		});
-		//var patients = 
-		model.findAll(function (err, patients) {
-			console.log('Patients in controller');
-			console.log(patients);
-			res.status(200).send(patients);
 
+		// Use the custom findAll method we attached to the model
+		model.findAll(function (err, patients) {
+			if (err) {
+				next(err);
+			}
+			console.log('No errors in patient');
+			res.status(200).json(patients);
 		});
 	};
 
@@ -56,19 +80,69 @@ module.exports = function patientRouter (options, _model) {
 
 	};
 
-	router.param('name', function(req, res, next, id) {
-		model.find(id, function (err, name) {
-			if (err) {
-				return next(err);
+	/*
+	 * We can pass an 'id' or a 'name' to our routes to find
+	 * a specific patient.
+	 */
+
+
+	router.param(function(name, fn) {
+		console.log('Regexp param');
+		console.log(name);
+		console.log(fn);
+		if (fn instanceof RegExp) {
+			return function (req, res, next, val) {
+				var capture;
+				// Check if the regex matches the value
+				// return it to our capture variable
+				if (capture = fn.exec(String(val))) {
+					console.log('Name');
+					console.log(name);
+					console.log('capture');
+					console.log(capture);
+					req.params[name] = capture;
+					next();
+				} else {
+					// No match, so we should go to the next
+					// route
+					next('route');
+				}
 			}
-			else if (!name) {
-				return next(new Error('failed to load user'));
+		}
+	});
+	/*
+	router.param('id', function(req, res, next, id) {
+		model.find({ _id : id }, function (err, patient) {
+			if (err) {
+				next(err);
+			}
+			else if (!patient) {
+				
+			}
+			req.patient = patient;
+			next();
+
+		});
+	});
+	*/
+
+	
+	
+	/*
+	router.param('name', function(req, res, next, _name) {
+		model.find({ name : _name}, function (err, patient) {
+			if (err) {
+				next(err);
+			}
+			else if (!patient) {
+				return next(new Error('Error finding patient.'));
 			}
 
-			req.name = name;
+			req.patient = patient;
 			next();
 		});
 	});
+	*/
 
 	// Create a patient
 	router.post('/', createPatient);
@@ -76,8 +150,15 @@ module.exports = function patientRouter (options, _model) {
 	// Get all the patients
 	router.get('/', getPatients);
 
-	// Get a patient
-	router.get('/:name', getPatient);
+
+	 
+	// Get a patient by their id
+	router.param('id', /^[a-z0-9]{24}$/);
+	router.get('/:id', getPatientById);
+
+	// Get a patient by their name
+	router.param('name', /^[a-zA-Z]{2,4}$/);
+	router.get('/:name', getPatientByName);
 
 	// Update a patient
 	router.put('/:name', updatePatient);

@@ -9,8 +9,6 @@ var patient = function(options){
 
 	var mongoose = require('mongoose');
 
-	//console.log(options._config.database);
-	//console.log(options._config.database);
 	//var mongoose = options._mongoose;
 	var Schema = mongoose.Schema;
 	var modelName = 'Patient';
@@ -29,19 +27,16 @@ var patient = function(options){
 
 	var patientSchema = new Schema(schemaObject);
 
-	var create = function(name, age){
-
-	};
-
-	patientSchema.methods.create = create;
-
-	patientSchema.statics.findByName = function (name, cb) {
-		this.find({name : new RegExp(name, 'i') }, cb);
-	};
-
-	patientSchema.statics.findAll = function(cb) {
-		return this.find({}, cb);
+	patientSchema.methods.create = function (name, age, callback) {
 		
+	};
+
+	patientSchema.statics.findByName = function (name, callback) {
+		this.find({name : new RegExp(name, 'i') }, callback);
+	};
+
+	patientSchema.statics.findAll = function(callback) {
+		this.find({}, callback);
 	};
 
 	var _model;
@@ -52,17 +47,12 @@ var patient = function(options){
 		}	
 	} catch(err) {
 		if (err.name === 'MissingSchemaError') {
-			//var schema = new Schema(schemaObject);
 			_model = mongoose.model(modelName, patientSchema, 'patients');
+		} else {
+			console.log(err.name + ": " + err.message);
 		}
-
 	}
-	//var _model = mongoose.model('Patient', patientSchema, 'patients');
 
-	
-
-
-	
 	return _model;	
 	/*
 	return {
@@ -73,6 +63,5 @@ var patient = function(options){
 	*/
 
 }();
-//};
 
 module.exports = patient;

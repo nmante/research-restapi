@@ -15,6 +15,8 @@ var express = require('express');
 var path = require('path');
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
+var debug = require('debug')('nii-research-backend');
+
 
 // Database manipulation
 var mongoose = require('mongoose');
@@ -31,10 +33,15 @@ var utils = require('./lib/middleware/utils');
 // Personal Error Handling Modules
 var errorHandling = require('./lib/middleware/errorHandling.js')
 
-console.log(config);
-mongoose.connect(config.database);
-console.log('mongoose');
-console.log(mongoose);
+var dbOptions = {
+	server : {
+		socketOptions : { keepAlive : 1 }
+	}
+
+};
+//dbOptions.server.socketOptions = { keepAlive : 1 };
+
+mongoose.connect(config.database, dbOptions);
 
 // Include our own custom javascript modules for Routing
 // The modules encapsulate http method behavior for each route
@@ -48,8 +55,6 @@ var options = {
 var models = require('./models/models.js')(options);
 var controllersPath = './controllers';
 var controllers = require('./controllers/controllers')(options, controllersPath, models);
-//var patient = require('./controllers/patients.js')(app, config, utils, models.patients);
-
 
 /* Configuration */
 // Use the 'bodyParser' to make parsing of the 'res' (response) body easy
@@ -62,12 +67,6 @@ app.use(cookieParser());
 // Tell express to use the 'public' directory for client side files
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Make the database accessible to our router
-app.use(function(req, res, next) {
-//	req.db = db; //define db, with mongoose or something
-	next();
-});
-
 
 app.locals.baseApiUrl = base = '/api/v1';
 // Tell Node+Express to use the modules for the routes
@@ -75,13 +74,9 @@ for (var url_key in controllers) {//.length - 1; i >= 0; i--) {
 	// Format of each element is a filename 'controllerName.js'
 	// We only want the 'controllerName' part
 	var router  = controllers[url_key];	
-	console.log('router object');
-	console.log(router);
 
 	// If it's index.js, thats our default route. Should be an empty string
 	var url = url_key == 'index' ? '' : url_key;
-	console.log('url');
-	console.log(url);	
 	app.use(base + '/' + url, router); 
 }
 
@@ -90,13 +85,13 @@ for (var url_key in controllers) {//.length - 1; i >= 0; i--) {
 // Return errors to the client via 404 and/or error pages
 app.use(errorHandling.clientErrorHandler);
 
-// Log errors for the server side
+// Log errors only for the server side. That's why we place it after the client side error
+// handler
 app.use(errorHandling.errorLogger);
 
-// Handle the errors on the server side
+// Now handle the errors on the server side
 app.use(errorHandling.errorHandler);
 
-var debug = require('debug')('nii-research-backend');
 
 app.set('port', process.env.PORT || 3000);
 //var server = 
