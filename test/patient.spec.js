@@ -8,13 +8,8 @@ module.exports = function (url, model){
 	// 'expect gives us tdd style assertions
 	var expect = require('expect.js');
 
-	// Include 'mongoose' so we can access the database
-	// Using this instead of creating Mock objects for now
-	// var mongoose = require('mongoose');
-
 	// 'should' gives us bdd style assertions
 	var should = require('should');
-
 
 	describe('Patient tests', function(){
 		var id;
@@ -38,20 +33,27 @@ module.exports = function (url, model){
 
 			
 		});
-	/*
+	
 		it('creates(POST) a patient at api/v1/patients route', function(done){
+			// Let's create a patient without the model
+			// This'll simulate creating a json object on a client
+			// Then we'll post the json object using the super agent send function
+			var patient = {};
+			patient.name = 'JV';
+			patient.age = 57;
 			superagent
 				.post(url + 'api/v1/patients')
-				.send(cPatient)
+				.send(patient)
 				.end(function(err, res) {
-					err.should.equal(null);
-					res.body.length.should.equal(0);
-					id = res.body[0]._id;
-					res.should.have.status(404);
+					expect(err).to.eql(null);
+					id = res.body._id;
+					expect(id).to.not.eql(null);
+					expect(res.body.name).to.eql(patient.name);
+					expect(res.status).to.eql(200);
 					done();
 				});
 		});
-	*/
+	
 		it('finds (GET) a patient with a specific name at the api/v1/patients/:name route',
 		function(done) {
 			superagent.get(url + 'api/v1/patients/EB')
@@ -84,7 +86,7 @@ module.exports = function (url, model){
 						done();
 					}*/
 					expect(err).to.eql(null);
-					expect(res.body.length).to.eql(2);
+					expect(res.body.length).to.be.above(0);
 					expect(res.body.map(function (item){
 						return item.name;
 					})).to.contain(cPatient.name);

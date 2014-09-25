@@ -41,7 +41,11 @@ var dbOptions = {
 };
 //dbOptions.server.socketOptions = { keepAlive : 1 };
 
-mongoose.connect(config.database, dbOptions);
+try {
+	mongoose.connect(config.database, dbOptions);
+} catch (e) {
+	console.log(e.name + ': ' + e.message);
+}
 
 // Include our own custom javascript modules for Routing
 // The modules encapsulate http method behavior for each route
@@ -94,11 +98,11 @@ app.use(errorHandling.errorHandler);
 
 
 app.set('port', process.env.PORT || 3000);
-//var server = 
-app.listen(app.get('port'));
-/*app.listen(app.get('port'), function() {
+
+//app.listen(app.get('port'));
+app.listen(app.get('port'), function() {
   debug('Express server listening on port ' + app.port);
 });
-*/
+
 
 //module.exports = app;

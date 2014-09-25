@@ -36,7 +36,8 @@ module.exports = function patientRouter (options, _model) {
 	router.get('/:name', getPatientByName);
 
 	// Update a patient
-	router.put('/:name', updatePatient);
+	router.put('/:name', updatePatientByName);
+	router.put('/:id', updatePatientById);
 
 	// Remove a patient
 	router.delete('/:name', deletePatientByName);
@@ -44,19 +45,23 @@ module.exports = function patientRouter (options, _model) {
 
 
 	function createPatient (req, res, next) {
-		var name = req.body.name;
-		if (name === undefined) {
+		var _name = req.body.name;
+		if (_name === undefined) {
 			// return error to client
 			// couldn't create cause we need the name
 			// this error should be caught on client,
 			// but just being thorough
 			next(err);
 		}	
-		var age = req.body.age;
-		var cause = req.body.impairment.cause || 'Define the impairment cause';
-		var level = req.body.impairment.level || 'Define the impairment level';
-		var studies = req.body.studies || 'This patient isn\'t apart of any studies';
-		var experiments = req.body.experiments || 'This patient doesn\'t have any experiments';
+		var _age = req.body.age;
+		var _impairment = req.body.impairment;		
+		var _cause, _level;
+
+		_cause = _impairment ? _impairment.cause : 'Define the impairment cause';
+		_level = _impairment ? _impairment.level : 'Define the impairment level';
+
+		var _studies = req.body.studies;
+		var _experiments = req.body.experiments;
 		var patient = {
 			name : _name,
 			age : _age,
@@ -74,7 +79,7 @@ module.exports = function patientRouter (options, _model) {
 				// pass the error along to our error handler
 				next(err);
 			}
-			res.status(200).send(_patient._id);
+			res.status(200).json(_patient);
 		});
 
 	};
@@ -125,7 +130,19 @@ module.exports = function patientRouter (options, _model) {
 		});
 	}
 
-	function updatePatient (req, res) {
+	function updatePatientById (req, res, next) {
+		var id = req.params.id;
+		if (id === undefined) {
+			next(err);
+		}
+		//Patient.updatePatientById(req.body
+		// Find the resource at this id, then change the proerties
+		// that need to be changed	
+	}
+
+	function updatePatientByName (req, res, next) {
+		// Find the resource at this id, then change the proerties
+		// that need to be changed	
 
 	}
 
@@ -138,6 +155,7 @@ module.exports = function patientRouter (options, _model) {
 			res.status(200).send();
 		});
 	}
+	
 
 	function deletePatientByName (req, res, next) {
 		var name = req.params.name;
@@ -153,7 +171,6 @@ module.exports = function patientRouter (options, _model) {
 	 * We can pass an 'id' or a 'name' to our routes to find
 	 * a specific patient.
 	 */
-
 	function regexEvaluator (name, fn) {
 		if (fn instanceof RegExp) {
 			return function (req, res, next, val) {
