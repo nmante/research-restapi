@@ -23,11 +23,12 @@ module.exports = function (url, model){
 			// in this module
 			cPatient.name = 'EB';
 			cPatient.age = 74;
-			cPatient.save(function (err) {
+			cPatient.save(function (err, patient) {
 				if (err) {
 					console.log(err.name + ': ' + err.message);
 					done();
 				} 
+				id = patient._id;
 				done();
 			});
 
@@ -101,6 +102,39 @@ module.exports = function (url, model){
 			});
 						
 		});
+
+		it('updates (PUT) a patient at the api/v1/patients/:name route', function (done) {
+			done();
+
+		});
+
+		it('updates (PUT) a patient at the api/v1/patients/:id route', function (done) {
+			done();
+
+		});
+
+
+
+		it('removes (DELETE) a patient at the api/v1/patients/:name route', function (done) {
+			superagent
+			.del(url + 'api/v1/patients/' + cPatient.name)
+			.end(function (err, res) {
+				expect(res.body.name).to.eql(cPatient.name);
+				expect(res.status).to.eql(200);
+				done();
+			});
+		});
+
+		it('removes (DELETE) a patient at the api/v1/patients/:id route', function (done) {
+			superagent
+			.del(url + 'api/v1/patients/' + id)
+			.end(function (err, res) {
+				expect(res.body._id).to.eql(id);
+				expect(res.status).to.eql(200);
+				done();
+			});
+		});
+
 
 		//afterEach(function(done){
 		after(function(done) {	

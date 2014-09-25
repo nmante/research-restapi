@@ -152,7 +152,10 @@ module.exports = function patientRouter (options, _model) {
 			next(err);
 		}
 		Patient.removePatientById(id, function (err, patient) {
-			res.status(200).send();
+			var _patient = {};
+			_patient.name = patient.name;
+			_patient._id = patient._id;
+			res.status(200).send(_patient);
 		});
 	}
 	
@@ -163,7 +166,10 @@ module.exports = function patientRouter (options, _model) {
 			next(err);
 		}
 		Patient.removePatientByName(name, function (err, patient) {
-			res.status(200).send();
+			var _patient = {};
+			_patient.name = patient.name;
+			_patient._id = patient._id;
+			res.status(200).send(_patient);
 		});
 	}
 

@@ -42,12 +42,12 @@ var patient = function(options){
 	};
 
 	patientSchema.statics.removePatientByName = function(_name, callback){
-		this.remove({ name : _name }, callback); 
+		this.findOneAndRemove({ name : _name }, callback); 
 
 	};
 
 	patientSchema.statics.removePatientById = function(id, callback) {
-		this.remove({ _id : id }, callback);
+		this.findByIdAndRemove( id, callback);
 	};
 
 	/*
