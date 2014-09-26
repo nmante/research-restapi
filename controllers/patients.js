@@ -8,6 +8,8 @@ module.exports = function patientRouter (options, _model) {
 
 	var express = require('express');
 	var router = express.Router();
+	var utils = options._utils;
+	var regexEvaluator = utils.regexEvaluator;
 	
 	var Patient = _model;
 
@@ -90,12 +92,8 @@ module.exports = function patientRouter (options, _model) {
 			if (err) {
 				next(err);
 			}
-			else if (!patient) {
-				return next(new Error('Error finding patient.'));
-			}
 
-			res.set({ 'Content-Type' : 'application/json' });
-			res.status(200).send(patient);
+			res.status(200).json(patient);
 		});
 	}
 
@@ -106,20 +104,12 @@ module.exports = function patientRouter (options, _model) {
 			if (err) {
 				next(err);
 			}
-			else if (!patient) {
-				//res.status(404).send(;	
-			}
 			
-			res.set( { 'Content-Type' : 'application/json' });
-			res.status(200).send(patient);
+			res.status(200).json(patient);
 		});
 	}
 
 	function getPatients (req, res, next) {
-		// Set the response headers
-		res.set({
-			'Content-Type' : 'application/json'
-		});
 
 		// Use the custom findAll method we attached to the model
 		Patient.findAllPatients(function (err, patients) {
@@ -140,7 +130,6 @@ module.exports = function patientRouter (options, _model) {
 			next(err);
 		}
 
-		//Patient.updatePatientById(req.body
 		// Find the resource at this id, then change the proerties
 		// that need to be changed	
 		Patient.updatePatientById(id, updateRequestBody, function (err, patient) {
@@ -172,16 +161,23 @@ module.exports = function patientRouter (options, _model) {
 	function deletePatientById (req, res, next) {
 		var id = req.params.id;
 		if (id === undefined) {
-			next(err);
+			return next(err);
 		}
 		Patient.removePatientById(id, function (err, patient) {
+			if (err) {
+				return next(err);
+			} else if (!patient) {
+				var e = new Error('patient not found');
+				e.name = 'DeleteError';
+				return next(e);
+			}
 
 			// Once we delete on Mongo
 			// Only return the id and name to the client
 			var _patient = {};
 			_patient.name = patient.name;
 			_patient._id = patient._id;
-			res.status(200).send(_patient);
+			res.status(200).json(_patient);
 		});
 	}
 	
@@ -198,30 +194,8 @@ module.exports = function patientRouter (options, _model) {
 			var _patient = {};
 			_patient.name = patient.name;
 			_patient._id = patient._id;
-			res.status(200).send(_patient);
+			res.status(200).json(_patient);
 		});
-	}
-
-	/*
-	 * We can pass an 'id' or a 'name' to our routes to find
-	 * a specific patient.
-	 */
-	function regexEvaluator (name, fn) {
-		if (fn instanceof RegExp) {
-			return function (req, res, next, val) {
-				var capture;
-				// Check if the regex matches the value
-				// return it to our capture variable
-				if (capture = fn.exec(String(val))) {
-					req.params[name] = capture;
-					next();
-				} else {
-					// No match, so we should go to the next
-					// route
-					next('route');
-				}
-			}
-		}
 	}
 
 	return router;

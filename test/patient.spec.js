@@ -44,7 +44,6 @@ module.exports = function (url, model){
 				updateName = patientForUpdate.name;
 				done();
 			});
-
 			
 		});
 	
@@ -117,8 +116,6 @@ module.exports = function (url, model){
 			updatePatient.name =  'Updated';
 			updatePatient.age = 13;
 			
-			console.log('Patient Name to be updated');
-			console.log(updateName);
 			superagent
 			.put(url + 'api/v1/patients/' + updateName)
 			.send(updatePatient)
@@ -126,7 +123,6 @@ module.exports = function (url, model){
 
 				// Should be no error here
 				expect(err).to.eql(null);
-				console.log(res.body);
 
 				// We should have found the object with the same id
 				expect(res.body._id).to.eql(String(updateId));
@@ -192,8 +188,16 @@ module.exports = function (url, model){
 			});
 		});
 
+		it('Creates an error by trying to remove a non existent patient', function (done) {
+			superagent
+			.del(url + 'api/v1/patients/' + id)
+			.end(function (err, res) {
+				// There won't be an error because we handle it
+				console.log(res.body);
+				done();
+			});
+		});
 
-		//afterEach(function(done){
 		after(function(done) {	
 			// Remove all the test objects so we don't
 			// affect any other modules
