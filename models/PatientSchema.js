@@ -41,6 +41,14 @@ var patient = function(options){
 		this.find({}, callback);
 	};
 
+	patientSchema.statics.updatePatientById = function(id, updateObject, callback) {
+		this.findByIdAndUpdate(id, updateObject, callback);
+	};
+
+	patientSchema.statics.updatePatientByName = function(_name, updateObject, callback) {
+		this.findOneAndUpdate({ name : _name }, updateObject, callback);
+	};
+
 	patientSchema.statics.removePatientByName = function(_name, callback){
 		this.findOneAndRemove({ name : _name }, callback); 
 

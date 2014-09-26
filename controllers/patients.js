@@ -82,7 +82,7 @@ module.exports = function patientRouter (options, _model) {
 			res.status(200).json(_patient);
 		});
 
-	};
+	}
 
 	function getPatientByName (req, res, next) {
 		var _name = req.params.name;
@@ -97,7 +97,7 @@ module.exports = function patientRouter (options, _model) {
 			res.set({ 'Content-Type' : 'application/json' });
 			res.status(200).send(patient);
 		});
-	};
+	}
 
 	function getPatientById (req, res, next) {
 		// Grab the id from our request body
@@ -131,19 +131,42 @@ module.exports = function patientRouter (options, _model) {
 	}
 
 	function updatePatientById (req, res, next) {
+		// Find the resource with this id
 		var id = req.params.id;
+
+		// Update with the request that the client sent
+		var updateRequestBody = req.body;
 		if (id === undefined) {
 			next(err);
 		}
+
 		//Patient.updatePatientById(req.body
 		// Find the resource at this id, then change the proerties
 		// that need to be changed	
+		Patient.updatePatientById(id, updateRequestBody, function (err, patient) {
+			if (err) {
+				next(err);
+			}
+			res.status(200).json(patient);
+		});
 	}
 
 	function updatePatientByName (req, res, next) {
-		// Find the resource at this id, then change the proerties
+		// Find the resource with this name, then change the proerties
 		// that need to be changed	
+		var name = req.params.name;
 
+		// Update with the request that the client sent
+		var updateRequestBody = req.body;
+		if (name === undefined) {
+			next(err);
+		}
+		Patient.updatePatientByName(name, updateRequestBody, function (err, updatedPatient) {
+			if (err) {
+				next(err);
+			}
+			res.status(200).json(updatedPatient);
+		});
 	}
 
 	function deletePatientById (req, res, next) {
@@ -152,6 +175,9 @@ module.exports = function patientRouter (options, _model) {
 			next(err);
 		}
 		Patient.removePatientById(id, function (err, patient) {
+
+			// Once we delete on Mongo
+			// Only return the id and name to the client
 			var _patient = {};
 			_patient.name = patient.name;
 			_patient._id = patient._id;
@@ -166,6 +192,9 @@ module.exports = function patientRouter (options, _model) {
 			next(err);
 		}
 		Patient.removePatientByName(name, function (err, patient) {
+
+			// Once we delete on Mongo
+			// Only return the id and name to the client
 			var _patient = {};
 			_patient.name = patient.name;
 			_patient._id = patient._id;

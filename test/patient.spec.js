@@ -12,7 +12,7 @@ module.exports = function (url, model){
 	var should = require('should');
 
 	describe('Patient tests', function(){
-		var id;
+		var id, updateId, updateName;
 		var cPatient = null;
 		var Patient = model;
 		cPatient = new Patient();
@@ -21,14 +21,27 @@ module.exports = function (url, model){
 		before(function(done){
 			// Add some test objects to our DB 
 			// in this module
+
+			// Make sure the db is empty
+			var query = Patient.remove({});
+			query.exec();
 			cPatient.name = 'EB';
 			cPatient.age = 74;
-			cPatient.save(function (err, patient) {
+
+			var updatePatient = new Patient();
+			updatePatient.name = 'RA';
+			updatePatient.age = 43;
+
+			var patients = [ cPatient, updatePatient ];
+			//var patients = [ { name : 'EB', age : 74 } , { name : 'RA', age : 43 }];
+			Patient.create(patients, function (err, patientForGet, patientForUpdate) {
 				if (err) {
 					console.log(err.name + ': ' + err.message);
 					done();
-				} 
-				id = patient._id;
+				}
+				id = patientForGet._id;
+				updateId = patientForUpdate._id;
+				updateName = patientForUpdate.name;
 				done();
 			});
 
@@ -64,7 +77,6 @@ module.exports = function (url, model){
 					expect(res.body.map(function (item) {
 						return item.name;
 					})).to.contain(cPatient.name);
-					console.log(res.body);
 					done();
 				});
 		});
@@ -82,10 +94,6 @@ module.exports = function (url, model){
 				superagent
 				.get(url + 'api/v1/patients/')
 				.end(function(err, res) {
-					/*if (err) {
-						console.log(err);
-						done();
-					}*/
 					expect(err).to.eql(null);
 					expect(res.body.length).to.be.above(0);
 					expect(res.body.map(function (item){
@@ -94,8 +102,6 @@ module.exports = function (url, model){
 					expect(res.body.map(function (item) {
 						return item.name;
 					})).to.contain(patient2.name);
-
-					console.log(res.body);
 					done();
 				});
 
@@ -103,13 +109,64 @@ module.exports = function (url, model){
 						
 		});
 
-		it('updates (PUT) a patient at the api/v1/patients/:name route', function (done) {
-			done();
+		it('updates (PUT) an existing patient at the api/v1/patients/:name route', function (done) {
+			// use an id that we've gotten previously 
+			// change some data for that item
+			
+			var updatePatient = {}; 
+			updatePatient.name =  'Updated';
+			updatePatient.age = 13;
+			
+			console.log('Patient Name to be updated');
+			console.log(updateName);
+			superagent
+			.put(url + 'api/v1/patients/' + updateName)
+			.send(updatePatient)
+			.end(function (err, res){
+
+				// Should be no error here
+				expect(err).to.eql(null);
+				console.log(res.body);
+
+				// We should have found the object with the same id
+				expect(res.body._id).to.eql(String(updateId));
+
+				// The patients name should equal 'Updated'
+				expect(res.body.name).to.eql(updatePatient.name);
+
+				// We want a 200 response to say everything's okay
+				expect(res.status).to.eql(200);
+				done();
+
+			});
 
 		});
 
 		it('updates (PUT) a patient at the api/v1/patients/:id route', function (done) {
-			done();
+			var updatePatient = {}; 
+			updatePatient.name =  'Updated Again';
+			updatePatient.age = 25;
+			
+			superagent
+			.put(url + 'api/v1/patients/' + updateId)
+			.send(updatePatient)
+			.end(function (err, res){
+
+				// Should be no error here
+				expect(err).to.eql(null);
+
+				// The patient should have the correct id 
+				expect(res.body._id).to.eql(String(updateId));
+
+				// The patient should name should equal 'Updated Again' 
+				expect(res.body.name).to.eql(updatePatient.name);
+
+				expect(res.body.age).to.eql(updatePatient.age);
+
+				// We want a 200 response to say everything's okay
+				expect(res.status).to.eql(200);
+				done();
+			});
 
 		});
 
