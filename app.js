@@ -53,7 +53,8 @@ var options = {
 	_app : app,
 	_config : config,
 	_utils : utils,
-	_mongoose : mongoose	
+	_mongoose : mongoose,
+	_errorCodes : errorHandling.errorCodes	
 };
 
 var models = require('./models/models.js')(options);

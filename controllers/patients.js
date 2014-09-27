@@ -10,6 +10,7 @@ module.exports = function patientRouter (options, _model) {
 	var router = express.Router();
 	var utils = options._utils;
 	var regexEvaluator = utils.regexEvaluator;
+	var errorCodes = options._errorCodes;
 	
 	var Patient = _model;
 
@@ -165,10 +166,14 @@ module.exports = function patientRouter (options, _model) {
 		}
 		Patient.removePatientById(id, function (err, patient) {
 			if (err) {
+				// Server 500 side error
+				res.status(500);
 				return next(err);
 			} else if (!patient) {
-				var e = new Error('patient not found');
-				e.name = 'DeleteError';
+				// The item wasn't there, so it's a 404
+				var e = new Error('Patient:' + id + ' not found');
+				res.status(404);
+				e.name = errorCodes.DeleteError;
 				return next(e);
 			}
 
@@ -185,11 +190,25 @@ module.exports = function patientRouter (options, _model) {
 	function deletePatientByName (req, res, next) {
 		var name = req.params.name;
 		if (name === undefined) {
-			next(err);
+			var e = new Error('Patient name not supplied');
+			e.name = errorCodes.ParamError;
+			return next(e);
 		}
 		Patient.removePatientByName(name, function (err, patient) {
+			if (err) {
+				// Server side error with mongoose or mongo
+				res.status(500);
+				next(err);
+			} else if (!patient) {
+			       // The patient resource wasn't there
+			       // Give the client back a 404	
+			       res.status(404);
+			       var e = new Error('Patient: ' + name + ' not found.');
+			       e.name = errorCodes.DeleteError;
+			       next(e);
+			}
 
-			// Once we delete on Mongo
+			// Only here once we delete the patient on Mongo
 			// Only return the id and name to the client
 			var _patient = {};
 			_patient.name = patient.name;
