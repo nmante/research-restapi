@@ -54,6 +54,7 @@ module.exports = function patientRouter (options, _model) {
 			// couldn't create cause we need the name
 			// this error should be caught on client,
 			// but just being thorough
+			
 			next(err);
 		}	
 		var _age = req.body.age;
@@ -77,11 +78,10 @@ module.exports = function patientRouter (options, _model) {
 		};
 			
 		Patient.createPatient(patient, function(err, _patient) {
-			if (err) {
-				// If we failed in creating the patient,
-				// pass the error along to our error handler
-				next(err);
-			}
+			var _error = determineErrorType(err, res, next, null,
+				       errorCodes.PostError, _patient);
+			if (_error) return next(_error);	
+			
 			res.status(200).json(_patient);
 		});
 
@@ -90,9 +90,9 @@ module.exports = function patientRouter (options, _model) {
 	function getPatientByName (req, res, next) {
 		var _name = req.params.name;
 		Patient.findPatientByName(_name, function (err, patient) {
-			if (err) {
-				next(err);
-			}
+			var _error = determineErrorType(err, res, next, _name,
+				       errorCodes.GetError, patient);	
+			if (_error) return next(_error);	
 
 			res.status(200).json(patient);
 		});
@@ -102,9 +102,9 @@ module.exports = function patientRouter (options, _model) {
 		// Grab the id from our request body
 		var id = req.params.id;
 		Patient.findById(id, function (err, patient) {
-			if (err) {
-				next(err);
-			}
+			var x = determineErrorType(err, res, next, id,
+					errorCodes.GetError, patient);
+			if (x) return next(x);
 			
 			res.status(200).json(patient);
 		});
@@ -114,9 +114,10 @@ module.exports = function patientRouter (options, _model) {
 
 		// Use the custom findAll method we attached to the model
 		Patient.findAllPatients(function (err, patients) {
-			if (err) {
-				next(err);
-			}
+			var x = determineErrorType(err, res, next,
+					       	null, errorCodes.DeleteError, patients);
+			if (x) return next(x);
+			
 			res.status(200).json(patients);
 		});
 	}
@@ -134,9 +135,10 @@ module.exports = function patientRouter (options, _model) {
 		// Find the resource at this id, then change the proerties
 		// that need to be changed	
 		Patient.updatePatientById(id, updateRequestBody, function (err, patient) {
-			if (err) {
-				next(err);
-			}
+			var x = determineErrorType(err, res, next,
+					       	id, errorCodes.DeleteError, patient);
+			if (x) return next(x);
+
 			res.status(200).json(patient);
 		});
 	}
@@ -152,9 +154,13 @@ module.exports = function patientRouter (options, _model) {
 			next(err);
 		}
 		Patient.updatePatientByName(name, updateRequestBody, function (err, updatedPatient) {
-			if (err) {
-				next(err);
-			}
+			// Custom function inside this controller
+			// Checks to see what type of error, then passes 
+			// responsibility to the error handler
+			var x = determineErrorType(err, res, next,
+					       	name, errorCodes.DeleteError, updatedPatient);
+			if (x) return next(x);
+
 			res.status(200).json(updatedPatient);
 		});
 	}
@@ -165,7 +171,7 @@ module.exports = function patientRouter (options, _model) {
 			return next(err);
 		}
 		Patient.removePatientById(id, function (err, patient) {
-			if (err) {
+			/*if (err) {
 				// Server 500 side error
 				res.status(500);
 				return next(err);
@@ -175,7 +181,12 @@ module.exports = function patientRouter (options, _model) {
 				res.status(404);
 				e.name = errorCodes.DeleteError;
 				return next(e);
-			}
+			}*/
+			//determineErrorType(err, res, next,
+			//		       	id, errorCodes.DeleteError, patient);
+			var x = determineErrorType(err, res, next,
+					       	id, errorCodes.DeleteError, patient);
+			if (x) return next(x);
 
 			// Once we delete on Mongo
 			// Only return the id and name to the client
@@ -195,18 +206,13 @@ module.exports = function patientRouter (options, _model) {
 			return next(e);
 		}
 		Patient.removePatientByName(name, function (err, patient) {
-			if (err) {
-				// Server side error with mongoose or mongo
-				res.status(500);
-				next(err);
-			} else if (!patient) {
-			       // The patient resource wasn't there
-			       // Give the client back a 404	
-			       res.status(404);
-			       var e = new Error('Patient: ' + name + ' not found.');
-			       e.name = errorCodes.DeleteError;
-			       next(e);
-			}
+			// Custom function inside this controller
+			// Checks to see what type of error, then passes 
+			// responsibility to the error handler
+			var x = determineErrorType(err, res, next,
+					       	name, errorCodes.DeleteError, patient);
+			if (x) return next(x);
+
 
 			// Only here once we delete the patient on Mongo
 			// Only return the id and name to the client
@@ -215,6 +221,21 @@ module.exports = function patientRouter (options, _model) {
 			_patient._id = patient._id;
 			res.status(200).json(_patient);
 		});
+	}
+
+	function determineErrorType(err, res, next, id, errCode, item) {
+		var x;
+		if (err) {
+			res.status(500);
+			x = err;
+		} else if (!item) {
+			res.status(404);
+			var e = new Error('Patient: ' + id + ' not found.');
+			e.name = errCode;
+			x = e;
+		}
+
+		return x;	
 	}
 
 	return router;
