@@ -193,7 +193,7 @@ module.exports = function (url, model){
 			.del(url + 'api/v1/patients/' + id)
 			.end(function (err, res) {
 				// There won't be an error because we handle it
-				console.log(res.body);
+				expect(res.status).to.eql(404);
 				done();
 			});
 		});
