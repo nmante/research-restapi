@@ -1,5 +1,5 @@
 
-module.exports = function (url, model){
+module.exports = function (url, models){
 	
 	// Include super agent library.  It encapsulates HTTP
 	// Methods and makes it easy to GET/POST/DEL data 
@@ -11,10 +11,11 @@ module.exports = function (url, model){
 	// 'should' gives us bdd style assertions
 	var should = require('should');
 
+
 	describe('Patient tests', function(){
 		var id, updateId, updateName;
 		var cPatient = null;
-		var Patient = model;
+		var Patient = models.patients;
 		cPatient = new Patient();
 
 		//beforeEach(function(done){	
@@ -37,7 +38,7 @@ module.exports = function (url, model){
 			Patient.create(patients, function (err, patientForGet, patientForUpdate) {
 				if (err) {
 					console.log(err.name + ': ' + err.message);
-					done();
+					done(err);
 				}
 				id = patientForGet._id;
 				updateId = patientForUpdate._id;

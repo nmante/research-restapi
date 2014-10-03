@@ -40,7 +40,7 @@ var Controllers = function (options, controllersPath, models) {
 	// Return the controller object so that other modules can use it
 	// The structure is like so
 	// {
-	// 	<routeName> : require(<routeName>)(_app, _config, _utils)
+	// 	<routeName> : require(<routeName>)(options, model)
 	// }
 	return ctrls;
 

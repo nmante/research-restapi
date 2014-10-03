@@ -54,8 +54,9 @@ module.exports = function patientRouter (options, _model) {
 			// couldn't create cause we need the name
 			// this error should be caught on client,
 			// but just being thorough
-			
-			next(err);
+			var err = new Error('Param not defined.');
+			err.name = errorCodes.ParamError;
+			return next(err);
 		}	
 		var _age = req.body.age;
 		var _impairment = req.body.impairment;		
@@ -89,6 +90,11 @@ module.exports = function patientRouter (options, _model) {
 
 	function getPatientByName (req, res, next) {
 		var _name = req.params.name;
+		if (_name === undefined){
+			var e = new Error('Patient name not supplied');
+			e.name = errorCodes.ParamError;
+			return next(e);
+		}
 		Patient.findPatientByName(_name, function (err, patient) {
 			var _error = determineErrorType(err, res, next, _name,
 				       errorCodes.GetError, patient);	
@@ -101,6 +107,11 @@ module.exports = function patientRouter (options, _model) {
 	function getPatientById (req, res, next) {
 		// Grab the id from our request body
 		var id = req.params.id;
+		if (id === undefined) {
+			var e = new Error('Patient id not supplied');
+			e.name = errorCodes.ParamError;
+			return next(e);
+		}
 		Patient.findById(id, function (err, patient) {
 			var x = determineErrorType(err, res, next, id,
 					errorCodes.GetError, patient);
@@ -115,7 +126,7 @@ module.exports = function patientRouter (options, _model) {
 		// Use the custom findAll method we attached to the model
 		Patient.findAllPatients(function (err, patients) {
 			var x = determineErrorType(err, res, next,
-					       	null, errorCodes.DeleteError, patients);
+					       	null, errorCodes.GetError, patients);
 			if (x) return next(x);
 			
 			res.status(200).json(patients);
@@ -129,7 +140,9 @@ module.exports = function patientRouter (options, _model) {
 		// Update with the request that the client sent
 		var updateRequestBody = req.body;
 		if (id === undefined) {
-			next(err);
+			var e = new Error('Patient name not supplied');
+			e.name = errorCodes.ParamError;
+			return next(e);
 		}
 
 		// Find the resource at this id, then change the proerties
@@ -151,7 +164,9 @@ module.exports = function patientRouter (options, _model) {
 		// Update with the request that the client sent
 		var updateRequestBody = req.body;
 		if (name === undefined) {
-			next(err);
+			var e = new Error('Patient name not supplied');
+			e.name = errorCodes.ParamError;
+			return next(e);
 		}
 		Patient.updatePatientByName(name, updateRequestBody, function (err, updatedPatient) {
 			// Custom function inside this controller
@@ -168,22 +183,12 @@ module.exports = function patientRouter (options, _model) {
 	function deletePatientById (req, res, next) {
 		var id = req.params.id;
 		if (id === undefined) {
-			return next(err);
+			var e = new Error('Patient id not supplied');
+			e.name = errorCodes.ParamError;
+			return next(e);
 		}
 		Patient.removePatientById(id, function (err, patient) {
-			/*if (err) {
-				// Server 500 side error
-				res.status(500);
-				return next(err);
-			} else if (!patient) {
-				// The item wasn't there, so it's a 404
-				var e = new Error('Patient:' + id + ' not found');
-				res.status(404);
-				e.name = errorCodes.DeleteError;
-				return next(e);
-			}*/
-			//determineErrorType(err, res, next,
-			//		       	id, errorCodes.DeleteError, patient);
+			
 			var x = determineErrorType(err, res, next,
 					       	id, errorCodes.DeleteError, patient);
 			if (x) return next(x);

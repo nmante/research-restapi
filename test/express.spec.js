@@ -21,6 +21,9 @@
 // Methods and makes it easy to GET/POST/DEL data 
 var superagent = require('superagent');
 
+// config
+var config = require('../config/config.json');
+
 // 'expect gives us tdd style assertions
 var expect = require('expect.js');
 
@@ -36,8 +39,9 @@ var models = require('./../models/models.js')();
 
 // Connect to our db so we can create and destroy objects at will
 var db;
+var x = 'mongodb://localhost:27017/research_test';
 try {
-	db = mongoose.connect('mongodb://localhost:27017/research_test');
+	db = mongoose.connect(config.development.database);
 } catch (e) {
 	console.log(e.name + ': ' + e.message);
 }
@@ -49,12 +53,12 @@ describe('Express REST Api server.', function(){
 	//var url = '';
 
 	// Patient test functions
-	require('./patient.spec')(url, models.patients);
+	require('./patient.spec')(url, models);
 	
 	// Experiment test Functions
-	require('./experiment.spec')(url, models.experiments);
+	require('./experiment.spec')(url, models);
 	
 	// Studies test functions 
-	require('./study.spec')(url, models.studies);
+	require('./study.spec')(url, models);
 	
 });
