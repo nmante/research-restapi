@@ -12,6 +12,7 @@ module.exports = function (appUrl, models){
 	// Our model for manipulating objects on the database
 	var Experiment = models.experiments;
 	var Patient = models.patients;
+	var Study = models.studies;
 
 	describe('Experiment Route tests', function(){
 
@@ -19,6 +20,7 @@ module.exports = function (appUrl, models){
 		var pName1, pId1;
 		var pName2, pId2;
 		var eNumber, eId;
+		var sId1, sName1, sPatients1;
 
 		// Run this segment before the tests start
 		before(function (done) {
@@ -26,6 +28,8 @@ module.exports = function (appUrl, models){
 			query.exec();
 			var query2 = Patient.remove({});
 			query2.exec();
+			var query3 = Study.remove({});
+			query3.exec();
 
 
 			var cPatient1 = new Patient();
@@ -46,21 +50,36 @@ module.exports = function (appUrl, models){
 				pName1 = patient1.name;
 				pName2 = patient2.name;
 
-				// Insert the items into the db
-				var tExperiment = new Experiment();
-				tExperiment.number = 1;
-				tExperiment.firstGraspTime = 1.55;
-				tExperiment.finalGraspTime = 8.3;
-				tExperiment.intervals = [1.55, 1.45, 3.53, 1.76];
+				var tStudy = new Study();
+				tStudy.name = 'Vibrotactile Study';
+				tStudy.patients = [pId1, pId2];
 
-				Experiment.createExperiment(tExperiment, function (err, experiment) {
-					if (err) {
-						console.log(err.name + ': ' + err.message);
-						done(err);
-					}
-					eNumber = experiment.number;
-					eId = experiment._id;
-					done();
+				Study.create(tStudy, function(err, study) {
+					if (err) return done(err);
+					sId1 = study._id;
+					sName1 = study.name;
+					sPatients1 = study.patients;
+
+					// Insert the items into the db
+					var tExperiment = new Experiment();
+					tExperiment.number = 1;
+					tExperiment.firstGraspTime = 1.55;
+					tExperiment.finalGraspTime = 8.3;
+					tExperiment.intervals = [1.55, 1.45, 3.53, 1.76];
+					tExperiment.studyId = sId1;
+					tExperiment.patientId = pId1;
+
+					Experiment.createExperiment(tExperiment, function (err, experiment) {
+						if (err) {
+							console.log(err.name + ': ' + err.message);
+							done(err);
+						}
+						eNumber = experiment.number;
+						eId = experiment._id;
+						console.log(experiment);
+						done();
+					});
+
 				});
 
 			});
@@ -89,13 +108,29 @@ module.exports = function (appUrl, models){
 		});
 
 		it('finds (GET) an experiment at the api/v1/experiments/:id route', function(done) {
-
-			done();
+			superagent
+			.get(appUrl + 'api/v1/experiments/' + eId)
+			.end(function(err, res) {
+				expect(err).to.eql(null);
+				expect(res.status).to.eql(200);
+				expect(res.body._id).to.eql(String(eId));
+				expect(res.body.number).to.eql(1);
+				done();
+			});
 		});
 
-		it('finds (GET) a experiment at api/v1/experiments/:name route', function(done) {
-
-			done();
+		it('finds (GET) a experiment at api/v1/experiments/:experimentNumber/:patientId/:studyId route', function(done) {
+			console.log(appUrl + 'api/v1/experiments/' + eNumber + '/' + pId1 + '/' + sId1)
+			superagent
+			.get(appUrl + 'api/v1/experiments/' + eNumber + '/' + pId1 + '/' + sId1)
+			.end(function(err, res) {
+				expect(err).to.eql(null);
+				expect(res.status).to.eql(200);
+				expect(res.body[0].number).to.eql(eNumber);
+				expect(res.body[0].patientId).to.eql(String(pId1));
+				expect(res.body[0].studyId).to.eql(String(sId1));
+				done();
+			});
 		});
 
 		it('finds (GET) all the experiments at the api/v1/experiments route', function(done){
@@ -134,7 +169,13 @@ module.exports = function (appUrl, models){
 					if (err) {
 						done(err);
 					}
-					done();
+					Study.remove(function(err) {
+						if (err) {
+							done(err);
+						}
+						done();
+					});
+
 				});
 
 			});

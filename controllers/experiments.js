@@ -26,8 +26,11 @@ module.exports = function experimentRouter (options, _model) {
 
 	router.param('patientId', /^[a-z0-9]{24}$/);
 	router.param('studyId', /^[a-z0-9]{24}$/);
-	router.param('experimentNumber', /^[0-9]{1,4}^/);
+	router.param('experimentNumber', /^[0-9]{1,4}$/);
 	router.get('/:experimentNumber/:patientId/:studyId', getExperimentWithConditions);
+
+	router.param('experimentId', /^[a-z0-9]{24}$/);
+	router.get('/:experimentId', getExperimentWithId);
 
 
 	function createExperiment (req, res, next) {
@@ -62,6 +65,23 @@ module.exports = function experimentRouter (options, _model) {
 		});
 	}
 
+	function getExperimentWithId(req, res, next) {
+		var id = req.params.experimentId;
+		if (id === undefined) {
+			var err = new Error('Experiment id not defined in Get');
+			err.name = errorCodes.ParamError;
+			next(err);
+		}
+		Experiment.findExperimentWithId(id, function (err, experiment) {
+			var x = determineErrorType(err, res, next, 
+					id, errorCodes.GetError, experiment); 
+			if (x) return next(x);
+
+			res.status(200).json(experiment);
+		});
+
+	}
+
 	function getExperiments (req, res, next) {
 		Experiment.findAllExperiments(function (err, experiments) {
 			var x = determineErrorType(err, res, next, 
@@ -73,12 +93,18 @@ module.exports = function experimentRouter (options, _model) {
 	}
 
 	function getExperimentWithConditions (req, res, next) {
-		var _conditions = req.params;
+		console.log('In get with conditions route');
+		var _conditions = {
+			number : Number(req.params.experimentNumber),
+			studyId : String(req.params.studyId),
+			patientId : String(req.params.patientId)
+		};
 		if (_conditions === undefined) {
 			var err = new Error('Params not set for create experiment');
-			err.name = errorCodes.CreateError;
+			err.name = errorCodes.ParamError;
 			next(err);
 		}
+		console.log(_conditions);
 		Experiment.findExperimentWithConditions(_conditions, function(err, _experiment) {
 			var _error = determineErrorType(err, res, next, null,
 					errorCodes.PostError, _experiment);

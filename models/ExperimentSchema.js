@@ -37,6 +37,11 @@ var Experiments = function(options){
 		this.create(experiment, cb);
 	};
 
+	// Read
+	experimentSchema.statics.findExperimentWithId = function(id, cb) {
+		this.findById(id, cb);
+	};
+
 	// Read - pass params as an object 
 	// e.g.
 	// 	options = { number : _number, patientId : _pId, studyId : _sId } 
