@@ -59,8 +59,17 @@ var Experiments = function(options){
 		this.findOneAndUpdate(conditions, updateObject, cb);
 	};
 
+	// Update
+	experimentSchema.statics.updateExperimentWithId = function(id, updateObject, cb) {
+		this.findByIdAndUpdate(id, updateObject, cb);
+	};
+
+	experimentSchema.statics.deleteExperimentWithId = function(id, cb) {
+		this.findByIdAndRemove(id, cb);
+	};
+
 	// Delete
-	experimentSchema.statics.removeExperimentWithConditions = function(conditions, cb) {
+	experimentSchema.statics.deleteExperimentWithConditions = function(conditions, cb) {
 		this.findOneAndRemove(condtions, cb);
 	};
 

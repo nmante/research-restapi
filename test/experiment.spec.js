@@ -76,7 +76,6 @@ module.exports = function (appUrl, models){
 						}
 						eNumber = experiment.number;
 						eId = experiment._id;
-						console.log(experiment);
 						done();
 					});
 
@@ -120,7 +119,6 @@ module.exports = function (appUrl, models){
 		});
 
 		it('finds (GET) a experiment at api/v1/experiments/:experimentNumber/:patientId/:studyId route', function(done) {
-			console.log(appUrl + 'api/v1/experiments/' + eNumber + '/' + pId1 + '/' + sId1)
 			superagent
 			.get(appUrl + 'api/v1/experiments/' + eNumber + '/' + pId1 + '/' + sId1)
 			.end(function(err, res) {
@@ -134,23 +132,70 @@ module.exports = function (appUrl, models){
 		});
 
 		it('finds (GET) all the experiments at the api/v1/experiments route', function(done){
-			
-			done();
+			superagent
+			.get(appUrl + 'api/v1/experiments/' )
+			.end(function (err, res) {
+				expect(err).to.eql(null);
+				expect(res.status).to.eql(200);
+				expect(res.body.length).to.be.above(0);
+				done();
+			});
 		});
 
 		it('updates (PUT) an experiment at the api/v1/experiments/:id route', function(done) {
-
-			done();
+			var experimentUpdate = {};
+			experimentUpdate.points = [{
+				x : 10, 
+				y : 40,
+				width : 40,
+				height : 50,
+				fsTimeStamp : '5819482',
+				timeStamp : '448292833',
+				soundCode : 0
+			}];
+			superagent
+			.put(appUrl + 'api/v1/experiments/' + eId)
+			.send(experimentUpdate)
+			.end(function (err, res) {
+				expect(err).to.eql(null);
+				expect(res.status).to.eql(200);
+				expect(res.body.points.length).to.be.above(0);
+				
+				var point = res.body.points[0];
+				expect(point.width).to.eql(40);
+				done();
+			});
 		});
 
-		it('updates (PUT) an experiment at the api/v1/experiments/:name route', function(done) {
+		it('updates (PUT) an experiment at the api/v1/experiments/:eNumber/:patientId/:studyId', 
+		function(done) {
 
-			done();
+			var updateObject = {};
+			updateObject.finalGraspTime = 20;
+			superagent
+			.put(appUrl + 'api/v1/experiments/' + eNumber + '/' + pId1 + '/' + sId1)
+			.send(updateObject)
+			.end(function (err, res) {
+				expect(err).to.eql(null);
+				expect(res.status).to.eql(200);
+				expect(res.body.finalGraspTime).to.eql(20);
+				var point = res.body.points[0];
+				expect(point.width).to.eql(40);
+				done();
+			});
+
 		});
 
 		it('deletes (DELETE) an experiment at the api/v1/experiments/:id route', function(done){
+			superagent
+			.del(appUrl + 'api/v1/experiments/' + eId)
+			.end(function(err, res) {
+				expect(err).to.eql(null);
+				expect(res.status).to.eql(200);
+				expect(res.body._id).to.eql(String(eId));
+				done();
+			});	
 
-			done();
 		});
 
 		it('deletes (DELETE) an experiment at the api/v1/experiments/:name route', function(done) {
@@ -160,27 +205,15 @@ module.exports = function (appUrl, models){
 
 		// Run this after the tests start. Cleanup the database 
 		after(function (done) {
-			Experiment.remove(function (err) {
-				if (err) {
-					console.log(err);
-					done(err);
-				}
-				Patient.remove(function (err) {
-					if (err) {
-						done(err);
-					}
-					Study.remove(function(err) {
-						if (err) {
-							done(err);
-						}
-						done();
-					});
-
-				});
-
-			});
+			var query = Experiment.remove({});
+			query.exec();
+			var query2 = Patient.remove({});
+			query2.exec();
+			var query3 = Study.remove({});
+			query3.exec();
+			done();
 
 		});
 	});
 
-}
+};

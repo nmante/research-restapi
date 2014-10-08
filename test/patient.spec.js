@@ -203,15 +203,20 @@ module.exports = function (url, models){
 			// Remove all the test objects so we don't
 			// affect any other modules
 			
-			Patient.remove(function (err) {
+			var query = Patient.remove({});
+			query.exec();
+			done();
+			
+			/*Patient.remove(function (err) {
 				if (err) {
 					console.log(err.name + ': ' + err.message); 
 					done(err);
 				}
 				done();
 			});
+			*/
 		});	
 
 	});
 
-}
+};
