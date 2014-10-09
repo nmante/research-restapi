@@ -14,8 +14,25 @@ var studies = function(options){
 		name : { type : String, index : { unique : true, required : true } },
 		patients : [{ type : Schema.ObjectId, ref : 'Patient' }]
 	});
-	studySchema.statics.findAll = function (cb) {
-		return this.find({}, cb);
+
+	studySchema.statics.createStudy = function(study, cb) {
+		this.create(study, cb);
+	};
+
+	studySchema.statics.findAllStudies = function (cb) {
+		this.find({}, cb);
+	};
+
+	studySchema.statics.findStudyById = function (id, cb) {
+		this.findById(id, cb);
+	};
+
+	studySchema.statics.updateStudyById = function (id, study, cb) {
+		this.findByIdAndUpdate(id, study, cb);
+	};
+
+	studySchema.statics.deleteStudyById = function (id, cb) {
+		this.findByIdAndRemove(id, cb);
 	};
 
 	var _model; 
@@ -36,15 +53,9 @@ var studies = function(options){
 	}
 	
 	return _model;
-	/*
-	return {
-		model : _model,
-		schema : studySchema
-	};
-	*/
+
 
 }();
-//};
 
 
 module.exports = studies;
